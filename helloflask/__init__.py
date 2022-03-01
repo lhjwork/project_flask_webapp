@@ -1,10 +1,20 @@
 from email import header
 from flask import Flask,g,make_response,Response, request
-from datetime import date, datetime
+from flask import session
+from datetime import date, datetime, timedelta
+
 
 app = Flask(__name__)
 #__name__ : 어플리케이션이름이 들어감
 app.debug =True
+
+
+app.config.update(
+  SECRET_KEY = 'X1243yRH!mMwf',
+  SESSION_COOKIE_NAME = 'pyweb_flask_session',
+  PERMANENT_SESSION_LIFETIME = timedelta(31) # 31 days 
+)
+
 
 @app.route('/res1')
 def res1():
@@ -16,14 +26,27 @@ def res1():
 @app.route('/wc')
 def wc():
   key = request.args.get('key')
-  val = request.args.get('val')
+  val = request.args.get('val') 
   res = Response("SET COOKIE")
   res.set_cookie(key,val)
+  session['Token'] = '123X'
   return make_response(res)
 
 #2) 다음과 같이 요청했을때 해당 key의 Cookie Value를 출력하는 코드 작성하시오. 
 #http://localhost:5000/rc?key=token
 
+@app.route('/rc')
+def rc():
+  key = request.args.get('key')
+  val = request.cookies.get(key)
+  return "cooke [" +key+ "] = " +val + " , " + session.get('Token')
+
+
+@app.route('/delsess')
+def delsess():
+    if session.get('Token'):
+        del session['Token']
+    return "Session이 삭제되었습니다."
 # def ymd(fmt):
 #   def trans(date_str):
 #     return datetime.strptime(date_str,fmt)
